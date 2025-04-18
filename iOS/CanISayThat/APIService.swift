@@ -12,6 +12,8 @@ struct CorrectionResponse: Codable {
     let corrected_sentence: String
     let feedback_italian: String
     let feedback_english: String
+    let native_like: String
+    let tone: String
 }
 
 class correctionAPI {

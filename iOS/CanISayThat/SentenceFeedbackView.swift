@@ -9,29 +9,73 @@ import SwiftUI
 
 struct SentenceFeedbackView: View {
     @State private var sentence: String = ""
-        @State private var submittedSentence: String = "Hello"
+    @State private var submittedSentence: String = "Hello"
         
-        // Mocked data for now
-        @State private var correctedSentence: String = "Oggi mi sono incontrato con i miei amici. Cosa hai fatto tu?"
-        @State private var explanationItalian: String = "Rimosso 'Che' in 'Che cosa', forma più colloquiale."
-        @State private var explanationEnglish: String = "Removed 'Che' in 'Che cosa', more colloquial form."
-
+    // Mocked data for now
+    @State private var correctedSentence: String = "Provide a sentence to receive feedback."
+    @State private var explanationItalian: String = ""
+    @State private var explanationEnglish: String = ""
+    @State private var nativeLike: String = "no"
+    @State private var tone: String = "positive"
+    
+    @State private var hasLoaded: Bool = true
+    @State private var isLoading: Bool = false
+    
+    
         var body: some View {
+            
+            
             VStack(alignment: .leading, spacing: 20) {
-                Text("Correzione frase")
+                Text("Correction")
                     .font(.title2)
                     .bold()
 
-                TextField("Inserisci una frase…", text: $sentence)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                VStack(spacing: 16) {
+                    // TextField
+                    TextField("Give me a sentence...", text: $sentence)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(nativeLike == "yes" ? Color.green.opacity(0.4) : Color.red.opacity(0.4)))
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(1), lineWidth: 2)
+                        )
+                    
+                    // Corrected Sentence
+                    
+                    if !isLoading {
+                        Text(correctedSentence)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.2)))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                    } else {
+                        ProgressView("Caricamento...") // Optional loading indicator
+                            .padding()
+                    }
+                    
+                }
+                
 
-                Button("Invia") {
+                Button("Send") {
+                    hasLoaded = false
+                    isLoading = true
                     submittedSentence = sentence
                     correctionAPI.send(sentence: sentence) { response in
                         if let response = response {
                             correctedSentence = response.corrected_sentence
                             explanationItalian = response.feedback_italian
                             explanationEnglish = response.feedback_english
+                            nativeLike = response.native_like
+                            tone = response.tone
+                            hasLoaded = true
+                            isLoading = false
+                        } else {
+                            correctedSentence = "Error: Please try again."
+                            hasLoaded = false
+                            isLoading = false
                         }
                     }
                 }
@@ -41,28 +85,32 @@ struct SentenceFeedbackView: View {
                 .foregroundColor(.white)
                 .cornerRadius(10)
 
-                if !submittedSentence.isEmpty {
+                if hasLoaded {
+                    
+                    
+                    
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("🔹 Originale:")
-                            .font(.headline)
-                        Text(submittedSentence)
-
-                        Text("🔸 Corretta:")
-                            .font(.headline)
-                        Text(correctedSentence)
-                            .foregroundColor(.green)
-
-                        Divider().padding(.vertical, 8)
-
-                        Text("📘 Spiegazione (IT):")
+                        if !tone.isEmpty {
+                            HStack {
+                                Text("Tone:")
+                                    .font(.headline)
+                                Text(tone)
+                            }
+                            
+                        }
+                        Text("Spiegazione (IT):")
                             .font(.headline)
                         Text(explanationItalian)
 
-                        Text("📙 Explanation (EN):")
+                        Text("Explanation (EN):")
                             .font(.headline)
                         Text(explanationEnglish)
                     }
-                    .padding(.top)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.2)))
+                        .font(.body)
+                        .foregroundColor(.primary)
                 }
 
                 Spacer()
