@@ -1,36 +1,66 @@
-from django.http import HttpResponse, JsonResponse
-from urllib.parse import unquote
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 from langchain_ollama import OllamaLLM
 
-# Define a global variable for the LLM model
-llm_model_name = "llama3.1"
+llm_model_name = "gemma3"
 
+import re
 
+@csrf_exempt
 def correction_view(request):
-    if request.method == 'GET':
-        # Handle GET request
-        sentence = request.GET.get('sentence', '')
-        sentence = unquote(sentence)  # Ensure the sentence is URL-decoded
-        level = "A2"
-        corrected_sentence = correct_sentence(sentence, level)
-        return HttpResponse(corrected_sentence, content_type="application/json")
-    return HttpResponse("Hello, world. You're at the corrections index.")
+    data = json.loads(request.body)
+    sentence = data.get('sentence', '')
+    language = data.get('language', 'italian')
+    level = data.get('level', 'A2')
 
-def correct_sentence(sentence, level):
+    response_str = correct_sentence(language, sentence, level)
+    print("LLM raw response:", repr(response_str))  # Optional debug
 
+    # Clean up markdown-style code fences
+    cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", response_str.strip(), flags=re.MULTILINE)
+
+    response_json = json.loads(cleaned)
+    return JsonResponse(response_json)
+
+
+
+
+def correct_sentence(language, sentence, level):
     model = OllamaLLM(model=llm_model_name)
 
-    prior_prompt = f"You are a language teacher holding a course for level {level}. A student wrote: "
-    latter_prompt = "Provide as answer only a JSON with: correct:yes/no, meaning: how the provided sentence would be understood, corrected_sentence: the corrected sentence."
+    prior_prompt = f"""
+Sei un esperto linguistico. Il tuo compito è correggere eventuali errori grammaticali, ortografici o di chiarezza in una frase in italiano. Poi, fornisci una breve spiegazione dell'errore **sia in italiano che in inglese**.
 
-    return model.invoke(prior_prompt + sentence + latter_prompt)
+Rispondi **solo** nel seguente formato JSON:
 
+{{
+  "original_sentence": "...",
+  "corrected_sentence": "...",
+  "feedback_italian": "...",
+  "feedback_english": "..."
+}}
 
-def correct_sentence_detailed(sentence, level):
+Esempio input:
+"Lei non sapevo dove andava perché era tardi."
 
-    model = OllamaLLM(model=llm_model_name)
+Esempio output:
+{{
+  "original_sentence": "Lei non sapevo dove andava perché era tardi.",
+  "corrected_sentence": "Lei non sapeva dove andava perché era tardi.",
+  "feedback_italian": "Corretta la coniugazione del verbo 'sapere' da 'sapevo' a 'sapeva'.",
+  "feedback_english": "Corrected the verb conjugation of 'sapere' from 'sapevo' to 'sapeva'."
+}}
 
-    prior_prompt = "Be a language teacher and provide only a JSON as feedback including: correct(yes/no), meaning(how the sentence would be understood), corrected_sentence(a corrected sentence, only changed if necessary). The sentence is: "
+Ora correggi la seguente frase:
+"{sentence}"
+"""
+
     
+    if not sentence.strip():  # Add a check to ensure the sentence is not empty
+        return {"error": "No sentence provided"}
 
-    return model.invoke(prior_prompt + sentence)
+    print("LLM prompt:", prior_prompt)  # 👈 Debug print
+
+    return model.invoke(prior_prompt)
+
