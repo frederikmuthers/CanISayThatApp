@@ -2,8 +2,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from langchain_ollama import OllamaLLM
+import google.generativeai as genai
 
-llm_model_name = "gemma3"
+ollama_model_name = "gemma3"
 
 import re
 
@@ -21,14 +22,22 @@ def correction_view(request):
     cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", response_str.strip(), flags=re.MULTILINE)
 
     response_json = json.loads(cleaned)
-    return JsonResponse(response_json)
+    return JsonResponse(response_json, json_dumps_params={"ensure_ascii": False})
 
+def llm_call_ollama(request):
+    model = OllamaLLM(model=ollama_model_name)
+    return model.invoke(request)
 
+def llm_call_google(request):
+    genai.configure(api_key="AIzaSyBw2hjcksap3dM9rQqpNvblnl6QEXirp6M")
+    model = genai.GenerativeModel("gemma-3-27b-it")
+    response = model.generate_content(request)
+    return response.text
 
 
 def correct_sentence(language, sentence, level):
 
-    prompt = f"""
+    prior_prompt = f"""
 You are a professional language expert. Your task is to:
 1. Correct any grammatical, spelling, or clarity issues in the following Italian sentence.
 2. Provide a brief explanation of the correction in **both Italian and English**.
@@ -82,13 +91,7 @@ Now correct the following sentence:
     if not sentence.strip():  # Add a check to ensure the sentence is not empty
         return {"error": "No sentence provided"}
 
-    print("LLM prompt:", prompt)  # 👈 Debug print
+    print("LLM prompt:", prior_prompt)  # 👈 Debug print
 
-    return get_feedback_ollama(prompt)
+    return llm_call_google(prior_prompt)
 
-
-
-def get_feedback_ollama(prompt):
-    model = OllamaLLM(model=llm_model_name)
-    response = model.invoke(prompt)
-    return response
