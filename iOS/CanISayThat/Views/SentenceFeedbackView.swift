@@ -52,14 +52,14 @@ struct SentenceFeedbackView: View {
                             .font(.body)
                             .foregroundColor(.primary)
                     } else {
-                        ProgressView("Caricamento...") // Optional loading indicator
+                        ProgressView("Loading...") // Optional loading indicator
                             .padding()
                     }
                     
                 }
                 
 
-                Button("Send") {
+                Button(action: {
                     hasLoaded = false
                     isLoading = true
                     submittedSentence = sentence
@@ -78,12 +78,15 @@ struct SentenceFeedbackView: View {
                             isLoading = false
                         }
                     }
+                }) {
+                    Text("Send")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue.opacity(0.9))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.blue.opacity(0.9))
-                .foregroundColor(.white)
-                .cornerRadius(10)
+
 
                 if hasLoaded {
                     

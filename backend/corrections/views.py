@@ -27,9 +27,8 @@ def correction_view(request):
 
 
 def correct_sentence(language, sentence, level):
-    model = OllamaLLM(model=llm_model_name)
 
-    prior_prompt = f"""
+    prompt = f"""
 You are a professional language expert. Your task is to:
 1. Correct any grammatical, spelling, or clarity issues in the following Italian sentence.
 2. Provide a brief explanation of the correction in **both Italian and English**.
@@ -83,7 +82,13 @@ Now correct the following sentence:
     if not sentence.strip():  # Add a check to ensure the sentence is not empty
         return {"error": "No sentence provided"}
 
-    print("LLM prompt:", prior_prompt)  # 👈 Debug print
+    print("LLM prompt:", prompt)  # 👈 Debug print
 
-    return model.invoke(prior_prompt)
+    return get_feedback_ollama(prompt)
 
+
+
+def get_feedback_ollama(prompt):
+    model = OllamaLLM(model=llm_model_name)
+    response = model.invoke(prompt)
+    return response

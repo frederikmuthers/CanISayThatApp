@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2133683A2DDD12C500C29F0E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 213368392DDD12C500C29F0E /* GRDB */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		21598FD82DB27F2C00346349 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2133683A2DDD12C500C29F0E /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = CanISayThat;
 			packageProductDependencies = (
+				213368392DDD12C500C29F0E /* GRDB */,
 			);
 			productName = CanISayThat;
 			productReference = 21598FC72DB27F2A00346349 /* CanISayThat.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 21598FBE2DB27F2A00346349;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				213368382DDD128E00C29F0E /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 21598FC82DB27F2A00346349 /* Products */;
 			projectDirPath = "";
@@ -558,6 +567,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		213368382DDD128E00C29F0E /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		213368392DDD12C500C29F0E /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 213368382DDD128E00C29F0E /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 21598FBF2DB27F2A00346349 /* Project object */;
 }
