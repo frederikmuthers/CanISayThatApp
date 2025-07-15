@@ -1,12 +1,11 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from langchain_ollama import OllamaLLM
-import google.generativeai as genai
 
-ollama_model_name = "gemma3"
-
+from utils import llm_call_google
 import re
+
+
 
 @csrf_exempt
 def correction_view(request):
@@ -24,15 +23,6 @@ def correction_view(request):
     response_json = json.loads(cleaned)
     return JsonResponse(response_json, json_dumps_params={"ensure_ascii": False})
 
-def llm_call_ollama(request):
-    model = OllamaLLM(model=ollama_model_name)
-    return model.invoke(request)
-
-def llm_call_google(request):
-    genai.configure(api_key="AIzaSyBw2hjcksap3dM9rQqpNvblnl6QEXirp6M")
-    model = genai.GenerativeModel("gemma-3-27b-it")
-    response = model.generate_content(request)
-    return response.text
 
 
 def correct_sentence(language, sentence, level):

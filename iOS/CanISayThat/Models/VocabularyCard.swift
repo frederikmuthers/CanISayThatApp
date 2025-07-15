@@ -13,7 +13,7 @@ struct VocabularyCard: Codable, Identifiable, PersistableRecord, FetchableRecord
     var word: String
     var translation: String
     var lastStudied: Date?
-    var masteryLevel: Int
+    var masteryLevel: Int = 0
     
     
 }

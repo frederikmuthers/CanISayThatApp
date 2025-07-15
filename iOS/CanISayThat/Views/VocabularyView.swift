@@ -10,6 +10,19 @@ import SwiftUI
 struct VocabularyView: View {
     
     @StateObject private var vocabularyManager = VocabularyCardManager()
+    @State private var sortOption: SortOption = .wordAscending
+    
+    
+    enum SortOption: String, CaseIterable, Identifiable {
+        case wordAscending = "Word (A-Z)"
+        case wordDescending = "Word (Z-A)"
+        case lastStudiedAscending = "Last Studied (Oldest First)"
+        case lastStudiedDescending = "Last Studied (Newest First)"
+        
+        var id: String { self.rawValue }
+
+    }
+
     
     var body: some View {
         VStack(spacing: 0) {
